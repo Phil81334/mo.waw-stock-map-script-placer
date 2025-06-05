@@ -1,29 +1,21 @@
-# --- Stock Imports ---
+# --- Imports ---
 
 import logging
 import os
 import shutil
-import subprocess
 from PySide6.QtCore import QThread, Signal
+
+import components.build_iwd as build_iwd
+import components.build_mod_ff as build_mod_ff
+import components.insert_gsc_code as insert_gsc_code
+from utils.create_shortcut import create_shortcut
+from utils.run_executable import run_executable
 
 # --- Logger ---
 
 logger = logging.getLogger(__name__)
 
-# /*===================================
-#     Initialize Config
-# ====================================*/
-
-# Needs to initialize, even if not used in this file.
-import core.config as config
-
 # --- Main ---
-
-import components.build_mod_ff as build_mod_ff
-import components.build_iwd as build_iwd
-import components.insert_gsc_code as insert_gsc_code
-from utils.create_shortcut import create_shortcut
-from utils.run_executable import run_executable
 
 class FileCopyWorker(QThread):
     # signals
@@ -46,7 +38,21 @@ class FileCopyWorker(QThread):
     build_iwd_success_handle = Signal(str)
     build_iwd_failure_handle = Signal(str)
 
-    def __init__(self, wawRootDir, src, dest, modName, mapName, mode, create_shortcut=False, insert_ingame_print_msg=False, build_mod=False, run_executable=False):
+    def __init__(self, 
+        wawRootDir, src, dest, modName, mapName, mode, 
+        create_shortcut=False, insert_ingame_print_msg=False, build_mod=False, run_executable=False) -> None:
+        """
+        wawRootDir: Path to the WaW root directory
+        src: Path to the source directory
+        dest: Path to the destination directory
+        modName: Name of the mod
+        mapName: Name of the map
+        mode: 'mp' or 'sp'
+        create_shortcut: Whether to create a shortcut
+        insert_ingame_print_msg: Whether to insert an ingame print message
+        build_mod: Whether to build the mod
+        run_executable: Whether to run the executable
+        """
         super().__init__()
         self.wawRootDir = wawRootDir
         self.src = src
@@ -61,7 +67,7 @@ class FileCopyWorker(QThread):
 
         self.exeName = 'CoDWaW' if self.mode != 'mp' else 'CoDWaWmp'
 
-    def run(self):
+    def run(self) -> None:
         try:
             self.copyFiles()
         
@@ -76,11 +82,16 @@ class FileCopyWorker(QThread):
                 self.buildMod()
         
             if self.run_executable:
-                self.runExecutable()
+                result = run_executable(
+                    running_dir=self.wawRootDir,
+                    exe_path=os.path.join(self.wawRootDir, f'{self.exeName}.exe'),
+                    exe_args=rf'+set fs_game mods/{self.modName} +devmap {self.mapName} +set r_fullscreen 0'
+                )
+                if not result.get("success"):
+                    self.exitWorker(False, result.get("error"))
+                    return
 
             self.exitWorker(True, f"Successfully created '{self.modName}' for '{self.mapName}' on '{self.mode}'")
-        except subprocess.CalledProcessError as err:
-            self.exitWorker(False, f"Error: {err}")
         except Exception as err:
             self.exitWorker(False, f"Error: {err}")
     
@@ -88,10 +99,10 @@ class FileCopyWorker(QThread):
         logger.info(msg)
         self.finished.emit(qbool, msg)
 
-    def copyFiles(self):
+    def copyFiles(self) -> None:
         shutil.copytree(self.src, self.dest, dirs_exist_ok=True)
 
-    def createShortcut(self, wawRootDir):
+    def createShortcut(self, wawRootDir) -> None:
         wawArgs = rf'+set fs_game mods/{self.modName} +devmap {self.mapName} +set r_fullscreen 0'
         wawPath = rf'"{wawRootDir}\{self.exeName}.exe"'  # root + exe requires to be wrapped in double quotes
 
@@ -164,14 +175,6 @@ class FileCopyWorker(QThread):
     # mod.ff & iwd
     def buildOutputHandleSlot(self, message: str) -> None:
         self.build_output_handle.emit(message)
-
-    def runExecutable(self):
-        _, message = run_executable(
-            running_dir=self.wawRootDir,
-            exe_path=os.path.join(self.wawRootDir, f'{self.exeName}.exe'),
-            exe_args=rf'+set fs_game mods/{self.modName} +devmap {self.mapName} +set r_fullscreen 0'
-        )
-        logger.info(message)
 
     def insertIngamePrintMsg(self):
         message = f'Mod: {self.modName} was built successfully!'
