@@ -45,7 +45,7 @@ https://youtu.be/-cfac1ugllk
 
 # Creator
 
-Price (a.k.a phil81334)
+Phil81334
 
 # Socials
 
