@@ -1,0 +1,7 @@
+PySide6
+csv
+platform
+shutil
+subprocess
+win32com
+zipfile
