@@ -1,77 +1,116 @@
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Imports ---
 
+import colorlog
 import logging
 import os
 import sys
+from logging.handlers import TimedRotatingFileHandler
 from PySide6.QtWidgets import QApplication
 
-# /*===================================
-#     Configure Logging
-# ====================================*/
+# --- Logger (Must be called before any logging/custom imports) ---
 
-# CREATE LOG FILE
-log_dir = os.path.join(os.path.dirname(sys.executable), '_internal', 'logs') if getattr(sys, 'frozen', False) else os.path.join(os.getcwd(), 'logs')
-log_file = "waw-stock-map-script-placer.log"
-log_path = os.path.join(log_dir, log_file)
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S',
-    filename=log_path,
-    filemode='w'
-)
+def set_logger() -> None:
+    # Format Strings
+    fmt_str = '%(log_color)s%(asctime)s%(reset)s - %(log_color)s%(name)s%(reset)s - %(log_color)s%(levelname)s%(reset)s - %(message)s'
+    timefmt_str = '%H:%M:%S'
+    datefmt_str = '%Y-%m-%d'
+    datetimefmt_str = f"{datefmt_str} {timefmt_str}"
 
-# /*===================================
-#     Initialize Config
-# ====================================*/
+    # Root Logger Config
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format=fmt_str,
+        datefmt=datetimefmt_str,
+        handlers=[]  # Start with no handlers; you'll add your own below
+    )
 
-# Needs to initialize, even if not used in this file.
-import src.core.config as config
+    # File Logs
+    logs_dir = os.path.join(os.path.dirname(sys.executable), '_internal', 'logs') if getattr(sys, 'frozen', False) else os.path.join(os.getcwd(), 'logs')
+    os.makedirs(logs_dir, exist_ok=True)
+    file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s', datefmt=datetimefmt_str)
+    
+    # File Handler (Logs DEBUG and above)
+    debug_file_handler = TimedRotatingFileHandler(
+        filename=os.path.join(logs_dir, "debug.log"),
+        when='midnight',
+        interval=1,
+        backupCount=7
+    )
+    debug_file_handler.setLevel(logging.DEBUG)  # Capture all logs
+    debug_file_handler.setFormatter(file_formatter)
 
-# /*===================================
-#     Main
-# ====================================*/
+    # File Handler (Logs INFO and above)
+    info_file_handler = TimedRotatingFileHandler(
+        filename=os.path.join(logs_dir, "info.log"),
+        when='midnight',
+        interval=1,
+        backupCount=7
+    )
+    info_file_handler.setLevel(logging.INFO)  # Only capture INFO and above
+    info_file_handler.setFormatter(file_formatter)
 
-from src.core.main_window import MainWindow
-from src.core.script_placer import ScriptPlacer
-from src.utils.message_box import display_message_box
+    # Console Handler (Terminal Output, Filtered)
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.DEBUG)  # Change dynamically based on needs
+    console_formatter = colorlog.ColoredFormatter(
+        fmt_str,
+        datefmt=datetimefmt_str,
+        log_colors={
+            'DEBUG': 'purple',
+            'INFO': 'cyan',
+            'WARNING': 'yellow',
+            'ERROR': 'red',
+            'CRITICAL': 'red,bg_white',
+        }
+    )
+    console_handler.setFormatter(console_formatter)
 
-class Entry:
+    # Root Logger Handlers
+    root_logger = logging.getLogger()
+    root_logger.addHandler(debug_file_handler)
+    root_logger.addHandler(info_file_handler)
+    root_logger.addHandler(console_handler)
 
-    @classmethod
-    def init(cls) -> None:
+    # logger.debug("Logger set")
 
-        if not config.WAW_ROOT_DIR_VALID:
-            display_message_box(f"Error: The WaW Root Directory '{config.WAW_ROOT_DIR}' does not exist")
-            sys.exit(0)
-        
-        # Initialize main window
-        cls.mainWindow = MainWindow()
+set_logger()
 
-        # Initialize script placer
-        cls.scriptPlacer = ScriptPlacer(cls.mainWindow)
+# --- Logger ---
 
-        # Show main window
-        cls.mainWindow.show()
+logger = logging.getLogger(__name__)
 
-# /*===================================
-#     Run Main
-# ====================================*/
+# --- Config ---
 
-if __name__ == "__main__":
+app = QApplication(sys.argv)
+
+def init_config() -> None:
+    import core.config as config
+    from components.ok_dialog import displayOkDialog
+    config.initialize()
+    if not config.LOADED:
+        displayOkDialog(
+            title="Error",
+            message="Failed to load config, check logs for more information"
+        )
+        sys.exit(1)
+
+init_config()
+
+# --- Main ---
+
+def main() -> None:
     try:
-        app = QApplication(sys.argv)
-        entry = Entry()
-        entry.init()
+        from core.orchestrator import Orchestrator
+        orchestrator = Orchestrator()
+        orchestrator.run()
         sys.exit(app.exec())
-    except KeyboardInterrupt:
-        logging.info("Application closed by user.")
-    except Exception as e:
-        logging.exception(f"An error occurred: {e}")
+    except Exception:
+        logger.exception("An error occurred")
+        sys.exit(1)
+
+# --- Run ---
+
+main()
 
 """
 # Compile all python files
@@ -88,4 +127,4 @@ py -m compileall . ; pyinstaller exe.spec --clean -y
 """
 
 # NOTE: when issues in program, run exe via cmd-prompt to view output
-# "C:\Users\Phil-\OneDrive\__Workbase__\ModOps HQ\repos\WaW-Stock-Map-Script-Placer\dist\WaW-Stock-Map-Script-Placer v1.1.1\WaW-Stock-Map-Script-Placer v1.1.1.exe"
+# "C:\Users\Phil-\__Workbase__\Repositories\mo.waw-stock-map-script-placer\dist\waw-stock-map-script-placer v1.2.1\waw-stock-map-script-placer v1.2.1.exe"

@@ -8,9 +8,7 @@
         So this module does take care of that, but for the actual building of the mod.ff, check out the 'build_mod_ff.py' module.
 """
 
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 import logging
 import os
@@ -20,15 +18,11 @@ import zipfile
 from datetime import datetime
 from typing import Callable, Optional
 
-# /*===================================
-#     Configure Logging
-# ====================================*/
+# --- Logger ---
 
 logger = logging.getLogger(__name__)
 
-# /*===================================
-#     Main
-# ====================================*/
+# --- Main ---
 
 stepFailure = False
 processInterrupted = False
@@ -226,7 +220,7 @@ if __name__ == '__main__':
     # NOTE: Be careful with variables that are in global scope like the below 2.
     #       I changed their styling from the args styling so functions couldn't access them unless passed as args.
     mod_name = 'zm_test1'
-    waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
+    waw_root_dir = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call of Duty World at War'
 
     # Feel free to copy/paste these functions into your own script.
     def buildIWDOutputHandleSlot(message: str) -> None:

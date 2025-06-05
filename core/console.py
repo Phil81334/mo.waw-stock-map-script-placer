@@ -1,15 +1,11 @@
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QWidget
 
-# /*===================================
-#     Main
-# ====================================*/
+# --- Main ---
 
-from src.ui.ui_console import Ui_ConsoleWidget
+from ui.ui_console import Ui_ConsoleWidget
 
 class Console(QWidget):
 

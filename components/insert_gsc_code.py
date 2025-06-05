@@ -1,18 +1,12 @@
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 import logging
 
-# /*===================================
-#     Configure Logging
-# ====================================*/
+# --- Logger ---
 
 logger = logging.getLogger(__name__)
 
-# /*===================================
-#     Main
-# ====================================*/
+# --- Main ---
 
 def insertMarkerToConfirmTheBuildsValidity(file_path, line_identifier, insert_str, append_str):
     try:
@@ -48,7 +42,7 @@ if __name__ == '__main__':
     mode = 'mp'
     modName = 'mp_airfield'
     mapName = 'mp_airfield'
-    dest = rf'D:\SteamLibrary\steamapps\common\Call of Duty World at War\mods\{modName}'
+    dest = f'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call of Duty World at War\\mods\\{modName}'
 
     message = f'Mod: {modName} was built successfully!'
     
@@ -77,9 +71,8 @@ flag_wait("all_players_connected");
 }}"""
 
         case _:
-            raise Exception(f'Unknown mode: {self.mode}')
+            raise Exception(f'Unknown mode: {mode}')
 
-    import os
     insertMarkerToConfirmTheBuildsValidity(
         file_path=file_path,
         line_identifier=line_identifier,

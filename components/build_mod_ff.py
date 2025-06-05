@@ -15,9 +15,7 @@
         I've added the logic to copy content from mod.csv in mod folder to zone_source folder. So all you need to do for a GUI-based application is copy text from mod.csv widget-section to mod.csv file in mod folder then this module can take care of the rest.      
 """
 
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 import csv
 import logging
@@ -26,15 +24,11 @@ import shutil
 import subprocess
 from typing import Callable, Optional
 
-# /*===================================
-#     Configure Logging
-# ====================================*/
+# --- Logger ---
 
 logger = logging.getLogger(__name__)
 
-# /*===================================
-#     Main
-# ====================================*/
+# --- Main ---
 
 stepFailure = False
 processInterrupted = False
@@ -236,7 +230,7 @@ if __name__ == '__main__':
     # NOTE: Be careful with variables that are in global scope like the below 2.
     #       I changed their styling from the args styling so functions couldn't access them unless passed as args.
     mod_name = 'zm_test1'
-    waw_root_dir = r'D:\SteamLibrary\steamapps\common\Call of Duty World at War'
+    waw_root_dir = 'C:\\Program Files (x86)\\Steam\\steamapps\\common\\Call of Duty World at War'
 
     # Feel free to copy/paste these functions into your own script.
     def buildModFFOutputHandleSlot(message: str) -> None:

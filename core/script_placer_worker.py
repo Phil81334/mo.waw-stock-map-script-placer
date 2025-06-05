@@ -1,6 +1,4 @@
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 import logging
 import os
@@ -8,9 +6,7 @@ import shutil
 import subprocess
 from PySide6.QtCore import QThread, Signal
 
-# /*===================================
-#     Configure Logging
-# ====================================*/
+# --- Logger ---
 
 logger = logging.getLogger(__name__)
 
@@ -19,17 +15,15 @@ logger = logging.getLogger(__name__)
 # ====================================*/
 
 # Needs to initialize, even if not used in this file.
-import src.core.config as config
+import core.config as config
 
-# /*===================================
-#     Main
-# ====================================*/
+# --- Main ---
 
-import src.components.build_mod_ff as build_mod_ff
-import src.components.build_iwd as build_iwd
-import src.components.insert_gsc_code as insert_gsc_code
-from src.utils.create_shortcut import create_shortcut
-from src.utils.run_executable import run_executable
+import components.build_mod_ff as build_mod_ff
+import components.build_iwd as build_iwd
+import components.insert_gsc_code as insert_gsc_code
+from utils.create_shortcut import create_shortcut
+from utils.run_executable import run_executable
 
 class FileCopyWorker(QThread):
     # signals

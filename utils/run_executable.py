@@ -1,14 +1,10 @@
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 import os
 import subprocess
 from typing import Union
 
-# /*===================================
-#     Main
-# ====================================*/
+# --- Main ---
 
 def run_executable(running_dir: str, exe_path: str, exe_args: str) -> Union[bool, str]:
     """

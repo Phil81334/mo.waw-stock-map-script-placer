@@ -1,0 +1,1 @@
+Get-ChildItem -Path "C:\Users\Phil-\__Workbase__\Repositories\mo.waw-stock-map-script-placer" -Filter "__pycache__" -Directory -Recurse | Remove-Item -Recurse -Force

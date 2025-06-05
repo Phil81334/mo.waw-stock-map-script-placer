@@ -1,0 +1,8 @@
+# --- Stock Imports ---
+
+import sys
+
+# --- Main ---
+
+def is_executable() -> bool:
+    return getattr(sys, 'frozen', False)

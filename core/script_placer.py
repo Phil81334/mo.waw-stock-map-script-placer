@@ -1,32 +1,20 @@
-# /*===================================
-#     Stock Imports
-# ====================================*/
+# --- Stock Imports ---
 
 import logging
 import os
 from PySide6.QtCore import QTimer, Slot
 
-# /*===================================
-#     Configure Logging
-# ====================================*/
+from components.ok_dialog import displayOkDialog
+import core.config as config
+from core.console import Console
+from core.script_placer_worker import FileCopyWorker
+from ui.ui_main_window import Ui_MainWindow
+
+# --- Logger ---
 
 logger = logging.getLogger(__name__)
 
-# /*===================================
-#     Initialize Config
-# ====================================*/
-
-# Needs to initialize, even if not used in this file.
-import src.core.config as config
-
-# /*===================================
-#     Main
-# ====================================*/
-
-from src.core.console import Console
-from src.core.script_placer_worker import FileCopyWorker
-from src.ui.ui_main_window import Ui_MainWindow
-from src.utils.message_box import display_message_box
+# --- Main ---
 
 class InputValidationAbort(Exception):
     """Custom exception to escape input validation warnings and hault the flow of execution"""
@@ -103,7 +91,7 @@ class ScriptPlacer:
         if not os.path.exists(config.WAW_ROOT_DIR):
             msg = f"Error: The WaW Root Directory '{config.WAW_ROOT_DIR}' does not exist"
             logger.debug(msg)
-            display_message_box(msg)
+            displayOkDialog(title="Error", message=msg)
             return        
         
         try:
@@ -114,7 +102,7 @@ class ScriptPlacer:
             return
         except Exception as err:
             logger.error(err)
-            display_message_box(f'Error: {err}')
+            displayOkDialog(title="Error", message=f'Error: {err}')
             return
         
         # get the template files directory
@@ -125,7 +113,7 @@ class ScriptPlacer:
         # join the template files root directory with the assets directory
         baseFilesDir = os.path.join(assetsRootDir, mode, mapName)
         if not os.path.exists(baseFilesDir):
-            display_message_box(f"Error: The base files directory '{baseFilesDir}' does not exist")
+            displayOkDialog(title="Error", message=f"Error: The base files directory '{baseFilesDir}' does not exist")
             return
 
         # we've already previously checked that the modName doesn't exist, so we can safely create the mod dir
@@ -226,7 +214,7 @@ class ScriptPlacer:
         # Connect signals and slots
         self.copy_worker.show_console.connect(self.console.show)
         self.copy_worker.update_status_bar.connect(self.updateStatusBar)
-        self.copy_worker.send_display_message_box_message.connect(lambda message: display_message_box(message))
+        self.copy_worker.send_display_message_box_message.connect(lambda message: displayOkDialog(message=message))
         self.copy_worker.finished.connect(self.onWorkerFinished)
 
         # mod.ff & iwd
@@ -287,7 +275,7 @@ class ScriptPlacer:
             # scroll to the bottom, sometimes it doesnt do it fully automatically
             self.console.ui.console.verticalScrollBar().setValue(self.console.ui.console.verticalScrollBar().maximum() + 100)
         else:
-            display_message_box(message)
+            displayOkDialog(message=message)
         
-        # if failure, the display_message_box function is blocking, so have the mod creation delay start after the message_box has been closed.
+        # if failure, the displayOkDialog function is blocking, so have the mod creation delay start after the displayOkDialog has been closed.
         QTimer.singleShot(delay, lambda: self.ui.submit_btn.setEnabled(True))

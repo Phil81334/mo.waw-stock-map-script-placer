@@ -1,7 +1,2 @@
+pywin32
 PySide6
-csv
-platform
-shutil
-subprocess
-win32com
-zipfile
